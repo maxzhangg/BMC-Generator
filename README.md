@@ -50,3 +50,6 @@ A tool to generate Business Model Canvas (BMC) diagrams directly from an Excel f
 
 ```bash
 pip install pandas pillow openpyxl
+
+## Release
+https://github.com/maxzhangg/BMC-Generator/releases/tag/BMC

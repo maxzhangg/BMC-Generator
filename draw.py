@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
+
+print("BMC Generator - Developed by Max Zhang for GNG4120/GNG5120")
 
 # ========= 参数配置 =========
 canvas_width, canvas_height = 1450, 850
@@ -49,35 +53,43 @@ def draw_text_blocks(draw, df_filtered, block_name, x, y, w, h):
     row_margin_y = 10
 
     if is_bottom:
+        box_width = int(w * 0.3)
+        col_margin_x = 20
+        row_margin_y = 10
+        start_x = x + 10
+        start_y = y + 40
         current_col = 0
-        current_row = 0
+        current_y = start_y
+        line_spacing = int(font_content_size * 1.4)
+
         for _, row in df_filtered.iterrows():
-            cls, text = row["Class"], row["Content"]
+            cls, text = row["Class"], str(row["Content"])
             color = color_map.get(cls, "#DDDDDD")
+            ascii_text = ''.join([ch if ord(ch) < 128 else '?' for ch in text])
+            words = ascii_text.strip().split(' ')
+            lines, current_line = [], ""
+            for word in words:
+                test_line = (current_line + " " + word) if current_line else word
+                test_w = font_content.getbbox(test_line)[2] - font_content.getbbox(test_line)[0]
+                if test_w < box_width - 10:
+                    current_line = test_line
+                else:
+                    lines.append(current_line)
+                    current_line = word
+            if current_line:
+                lines.append(current_line)
 
-            ascii_text = ''.join([ch if ord(ch) < 128 else '?' for ch in str(text)])
-            clean_text = ascii_text.strip()
-            text_w = font_content.getbbox(clean_text)[2] - font_content.getbbox(clean_text)[0]
-            while text_w > box_width - 10 and len(clean_text) > 3:
-                clean_text = clean_text[:-1]
-                text_w = font_content.getbbox(clean_text + '...')[2] - font_content.getbbox(clean_text + '...')[0]
-            if text_w > box_width - 10:
-                continue
-            if clean_text != ascii_text.strip():
-                clean_text += "..."
-
-            cx = x + 10 + current_col * (box_width + col_margin_x)
-            cy = y + 40 + current_row * (box_height + row_margin_y)
-            if cy + box_height > y + h:
-                break
-
-            draw.rectangle([cx, cy, cx + box_width, cy + box_height], fill=color, outline="black")
-            draw.text((cx + 5, cy + 4), clean_text, fill="black", font=font_content)
-
-            current_row += 1
-            if current_row >= max_per_col:
-                current_row = 0
+            box_height = line_spacing * len(lines) + 4
+            if current_y + box_height > y + h:
                 current_col += 1
+                current_y = start_y
+            cx = start_x + current_col * (box_width + col_margin_x)
+            cy = current_y
+            draw.rectangle([cx, cy, cx + box_width, cy + box_height], fill=color, outline="black")
+            for i, line in enumerate(lines):
+                draw.text((cx + 5, cy + 4 + i * line_spacing), line, fill="black", font=font_content)
+            current_y += box_height + row_margin_y
+
     else:
         text_y = y + 40
         line_spacing = int(font_content_size * 1.4)
@@ -126,7 +138,7 @@ def draw_bmc(classes_to_include, output_filename):
             draw_text_blocks(draw, df_block, block, x, y, w, h)
 
     img.save(output_filename)
-    print(f"已保存：{output_filename}")
+    print(f"Saved：{output_filename}")
 
 # ========= 生成三张图 =========
 draw_bmc(["Baseline"], output_prefix + "baseline.png")
