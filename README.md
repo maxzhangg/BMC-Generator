@@ -32,17 +32,17 @@ A tool to generate Business Model Canvas (BMC) diagrams directly from an Excel f
 ## 🖼 Output Examples
 
 ### ✅ 1. Baseline only
-![Baseline only](images/bmc_output_baseline.png)
+![Baseline only](images/bmc_baseline.png)
 
 ---
 
 ### ✅ 2. Baseline + Health Check
-![Baseline + Health Check](images/bmc_output_baseline_health.png)
+![Baseline + Health Check](images/bmc_baseline_health.png)
 
 ---
 
 ### ✅ 3. Baseline + Health Check + Assumptions
-![Baseline + Health + Assumptions](images/bmc_output_baseline_health_assumptions.png)
+![Baseline + Health + Assumptions](images/bmc_baseline_health_assumptions.png)
 
 ---
 
