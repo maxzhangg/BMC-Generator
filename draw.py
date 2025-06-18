@@ -152,7 +152,6 @@ def draw_bmc(classes_to_include, output_filename):
         sub_font = ImageFont.load_default()
 
     # 写入三行标题
-        # 写入标题
     header_draw.text((20, 10), "BMC", fill="black", font=header_font)
     header_draw.text((20, 50), "designed for: Style Max - Your AI Fashion Assistant", fill="black", font=sub_font)
 
