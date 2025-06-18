@@ -123,8 +123,9 @@ def draw_bmc(classes_to_include, output_filename):
     df = pd.read_excel(excel_path)
     df = df[df["Class"].isin(classes_to_include)]
 
-    img = Image.new("RGB", (canvas_width, canvas_height), "white")
-    draw = ImageDraw.Draw(img)
+    # 原图绘制
+    base_img = Image.new("RGB", (canvas_width, canvas_height), "white")
+    draw = ImageDraw.Draw(base_img)
 
     for block, (x_r, y_r, w_r, h_r) in block_ratios.items():
         x = int(x_r * canvas_width)
@@ -137,8 +138,43 @@ def draw_bmc(classes_to_include, output_filename):
         if not df_block.empty:
             draw_text_blocks(draw, df_block, block, x, y, w, h)
 
-    img.save(output_filename)
+    # 创建新图：加 header 区域（100px 高）
+    header_height = 100
+    final_img = Image.new("RGB", (canvas_width, canvas_height + header_height), "white")
+    final_img.paste(base_img, (0, header_height))
+
+    header_draw = ImageDraw.Draw(final_img)
+    try:
+        header_font = ImageFont.truetype("arial.ttf", size=28)
+        sub_font = ImageFont.truetype("arial.ttf", size=18)
+    except:
+        header_font = ImageFont.load_default()
+        sub_font = ImageFont.load_default()
+
+    # 写入三行标题
+        # 写入标题
+    header_draw.text((20, 10), "BMC", fill="black", font=header_font)
+    header_draw.text((20, 50), "designed for: Style Max - Your AI Fashion Assistant", fill="black", font=sub_font)
+
+    # 图例（color code legend）
+    legend_x = 700
+    legend_y = 50
+    legend_items = [
+        ("Baseline", "#FFD700"),
+        ("Health Check", "#FF6347"),
+        ("Assumptions", "#87CEFA"),
+    ]
+    box_w, box_h = 20, 20
+    spacing = 10
+    for i, (label, color) in enumerate(legend_items):
+        x = legend_x + i * 180
+        header_draw.rectangle([x, legend_y, x + box_w, legend_y + box_h], fill=color, outline="black")
+        header_draw.text((x + box_w + 5, legend_y), label, fill="black", font=sub_font)
+
+
+    final_img.save(output_filename)
     print(f"Saved：{output_filename}")
+
 
 # ========= 生成三张图 =========
 draw_bmc(["Baseline"], output_prefix + "baseline.png")
